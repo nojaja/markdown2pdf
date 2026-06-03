@@ -11,25 +11,31 @@ If you are an AI agent, prefer the JSON help and report modes so you can inspect
 Run the CLI with `npx`:
 
 ```bash
-npx md2pdf --help
+npx mermaid-md-pdf-cli --help
+```
+
+You can also execute the published package explicitly and call the `md2pdf` binary:
+
+```bash
+npx --package mermaid-md-pdf-cli md2pdf --help
 ```
 
 Convert a single Markdown file:
 
 ```bash
-npx md2pdf --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
+npx mermaid-md-pdf-cli --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
 ```
 
 Convert every Markdown file in a directory while preserving the relative folder structure:
 
 ```bash
-npx md2pdf --input docs --output dist
+npx mermaid-md-pdf-cli --input docs --output dist
 ```
 
 Generate a conversion plan without writing PDFs:
 
 ```bash
-npx md2pdf --input docs --plan --report-format json
+npx mermaid-md-pdf-cli --input docs --plan --report-format json
 ```
 
 ## AI Agent Usage
@@ -43,9 +49,9 @@ Use these options when another tool or agent needs to understand the CLI without
 Recommended flow for agents:
 
 ```bash
-npx md2pdf --help-format json
-npx md2pdf --input docs --plan --report-format json
-npx md2pdf --input docs --report-format json
+npx mermaid-md-pdf-cli --help-format json
+npx mermaid-md-pdf-cli --input docs --plan --report-format json
+npx mermaid-md-pdf-cli --input docs --report-format json
 ```
 
 ## Installation
@@ -85,7 +91,7 @@ Mermaid diagrams are loaded from the jsDelivr CDN at render time, so network acc
 The repository includes a sample file you can use to verify the renderer:
 
 ```bash
-npx md2pdf --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
+npx mermaid-md-pdf-cli --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
 ```
 
 For folder inputs, output paths keep the source directory layout. By default, PDFs are written under `<input>/_pdf/`.

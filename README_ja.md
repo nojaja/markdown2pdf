@@ -11,25 +11,31 @@ AI エージェントが使う場合は、`--help-format json` と `--report-for
 `npx` から CLI を実行します。
 
 ```bash
-npx md2pdf --help
+npx mermaid-md-pdf-cli --help
+```
+
+公開パッケージを明示して `md2pdf` バイナリを実行する場合は次を使います。
+
+```bash
+npx --package mermaid-md-pdf-cli md2pdf --help
 ```
 
 Markdown ファイル 1 つを PDF に変換します。
 
 ```bash
-npx md2pdf --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
+npx mermaid-md-pdf-cli --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
 ```
 
 ディレクトリ配下の Markdown をまとめて変換し、相対パス構造を保ちます。
 
 ```bash
-npx md2pdf --input docs --output dist
+npx mermaid-md-pdf-cli --input docs --output dist
 ```
 
 PDF を書き出さず、変換計画だけを出力します。
 
 ```bash
-npx md2pdf --input docs --plan --report-format json
+npx mermaid-md-pdf-cli --input docs --plan --report-format json
 ```
 
 ## AI エージェント向け
@@ -43,9 +49,9 @@ npx md2pdf --input docs --plan --report-format json
 推奨フロー:
 
 ```bash
-npx md2pdf --help-format json
-npx md2pdf --input docs --plan --report-format json
-npx md2pdf --input docs --report-format json
+npx mermaid-md-pdf-cli --help-format json
+npx mermaid-md-pdf-cli --input docs --plan --report-format json
+npx mermaid-md-pdf-cli --input docs --report-format json
 ```
 
 ## インストール
@@ -85,7 +91,7 @@ Mermaid 図表は描画時に jsDelivr CDN から読み込まれるため、Merm
 リポジトリに含まれるサンプルを使って動作確認できます。
 
 ```bash
-npx md2pdf --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
+npx mermaid-md-pdf-cli --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
 ```
 
 ディレクトリ入力では、出力先は元のディレクトリ構造を維持します。既定では `<input>/_pdf/` 配下に書き出されます。
