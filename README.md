@@ -55,6 +55,12 @@ npm install
 npm run build
 ```
 
+To run conversion directly from the built `dist` output, use:
+
+```bash
+node ./dist/src/index.js --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
+```
+
 ## Configuration
 
 The CLI supports the following options:

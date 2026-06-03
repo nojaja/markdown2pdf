@@ -55,6 +55,12 @@ npm install
 npm run build
 ```
 
+build 済みの `dist` を直接使って変換する場合は、次のコマンドを実行します。
+
+```bash
+node ./dist/src/index.js --input sample/Gantt_Sample.md --output sample/Gantt_Sample.pdf
+```
+
 ## 設定
 
 CLI では次のオプションを利用できます。
