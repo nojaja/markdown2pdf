@@ -1,0 +1,52 @@
+{
+  "name": "markdown2pdf",
+  "version": "1.0.0",
+  "description": "CLI to convert Markdown with Mermaid diagrams into PDF",
+  "type": "commonjs",
+  "main": "dist/src/index.js",
+  "bin": {
+    "md2pdf": "dist/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit",
+    "test": "jest -c jest.unit.config.js",
+    "test:ci": "jest -c jest.coverage.config.js",
+    "test:e2e": "npm run build && jest -c jest.e2e.config.js",
+    "lint": "eslint src/**/*.ts",
+    "depcruise": "dependency-cruiser --config .dependency-cruiser.js src",
+    "cpd": "jscpd src --min-lines 5 --min-tokens 50 --threshold 0",
+    "docs": "typedoc --options typedoc.js"
+  },
+  "keywords": [
+    "markdown",
+    "pdf",
+    "mermaid",
+    "cli"
+  ],
+  "author": "Developer <dev@example.com> (https://example.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "commander": "^11.1.0",
+    "markdown-it": "^8.4.2",
+    "markdown-it-mermaid": "^0.2.5",
+    "puppeteer-core": "^25.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.9.1",
+    "dependency-cruiser": "^17.4.3",
+    "eslint": "^10.4.1",
+    "eslint-plugin-jsdoc": "^63.0.1",
+    "eslint-plugin-sonarjs": "^4.0.3",
+    "jest": "^30.4.2",
+    "jscpd": "^4.2.4",
+    "ts-jest": "^29.4.11",
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.12.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1"
+  }
+}

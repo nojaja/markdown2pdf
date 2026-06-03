@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: windows-latest
+    env:
+      PUPPETEER_EXECUTABLE_PATH: C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Type Check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Dependency Cruiser
+        run: npm run depcruise
+
+      - name: Duplicate Code Check
+        run: npm run cpd
+
+      - name: Docs
+        run: npm run docs
+
+      - name: Unit and Coverage Tests
+        run: npm run test:ci
+
+      - name: E2E Gantt Rendering
+        run: npm run test:e2e
