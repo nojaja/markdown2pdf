@@ -77,6 +77,18 @@ The CLI supports the following options:
 - `--scale <number>`: Page scale. Default: `1`.
 - `--margin-top`, `--margin-right`, `--margin-bottom`, `--margin-left`: CSS margin values. Default: `10mm`.
 
+Shorthand aliases are also available:
+
+- `-i`: `--input`
+- `-o`: `--output`
+- `-p`: `--plan`
+- `-r`: `--report-format`
+- `-j`: `--help-format`
+- `-t`: `--timeout`
+- `-f`: `--format`
+- `-l`: `--landscape`
+- `-s`: `--scale`
+
 If you need to point Puppeteer to a specific browser binary, set `PUPPETEER_EXECUTABLE_PATH`.
 
 Mermaid diagrams are loaded from the jsDelivr CDN at render time, so network access is required when converting documents that use Mermaid.

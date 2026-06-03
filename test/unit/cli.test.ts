@@ -132,6 +132,36 @@ describe('runCli', () => {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   });
 
+  test('短縮オプション指定時も通常どおり変換計画を返す', async () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'md2pdf-cli-short-'));
+    const inputDir = path.join(tempRoot, 'docs');
+    fs.mkdirSync(path.join(inputDir, 'a'), { recursive: true });
+    fs.writeFileSync(path.join(inputDir, 'a', 'intro.md'), '# hello');
+
+    let stdout = '';
+    let stderr = '';
+
+    const exitCode = await runCli(
+      ['-i', inputDir, '-o', path.join(tempRoot, 'dist'), '-p', '-r', 'json'],
+      (content) => {
+        stdout += content;
+      },
+      (content) => {
+        stderr += content;
+      }
+    );
+
+    expect(exitCode).toBe(0);
+    expect(stderr).toBe('');
+
+    const parsed = JSON.parse(stdout);
+    expect(parsed.summary.targets).toBe(1);
+    expect(parsed.summary.success).toBe(1);
+    expect(parsed.summary.failed).toBe(0);
+
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  });
+
   test('通常実行時に全件失敗かつタイムアウト分類ならexit code 4を返す', async () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'md2pdf-cli-allfail-'));
     const inputFile = path.join(tempRoot, 'sample.md');

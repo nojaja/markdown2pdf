@@ -80,16 +80,16 @@ export const runCli = async (
   const program = new Command();
 
   program
-    .name('md2pdf')
-    .requiredOption('--input <path>')
-    .option('--output <path>')
-    .option('--plan')
-    .option('--report-format <format>', 'text|json', 'text')
-    .option('--help-format <format>', 'text|json', 'text')
-    .option('--timeout <ms>', 'PDF描画タイムアウト(ms)', '30000')
-    .option('--format <paper>', 'A4|Letter', 'A4')
-    .option('--landscape', '横向きでPDF出力')
-    .option('--scale <number>', '0.1-2.0', '1')
+    .name('mermaid-md-pdf-cli')
+    .requiredOption('-i, --input <path>')
+    .option('-o, --output <path>')
+    .option('-p, --plan')
+    .option('-r, --report-format <format>', 'text|json', 'text')
+    .option('-j, --help-format <format>', 'text|json', 'text')
+    .option('-t, --timeout <ms>', 'PDF描画タイムアウト(ms)', '30000')
+    .option('-f, --format <paper>', 'A4|Letter', 'A4')
+    .option('-l, --landscape', '横向きでPDF出力')
+    .option('-s, --scale <number>', '0.1-2.0', '1')
     .option('--margin-top <cssLength>', '例: 10mm', '10mm')
     .option('--margin-right <cssLength>', '例: 10mm', '10mm')
     .option('--margin-bottom <cssLength>', '例: 10mm', '10mm')
@@ -304,34 +304,34 @@ const buildHelpJson = (): unknown => {
     command: 'md2pdf',
     options: [
       {
-        name: '--input <path>',
+        name: '-i, --input <path>',
         required: true,
         type: 'string'
       },
       {
-        name: '--output <path>',
+        name: '-o, --output <path>',
         required: false,
         type: 'string'
       },
       {
-        name: '--plan',
+        name: '-p, --plan',
         required: false,
         type: 'boolean'
       },
       {
-        name: '--report-format <format>',
+        name: '-r, --report-format <format>',
         required: false,
         type: 'text|json',
         default: 'text'
       },
       {
-        name: '--help-format <format>',
+        name: '-j, --help-format <format>',
         required: false,
         type: 'text|json',
         default: 'text'
       },
       {
-        name: '--timeout <ms>',
+        name: '-t, --timeout <ms>',
         required: false,
         type: 'number',
         default: '30000'

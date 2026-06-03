@@ -77,6 +77,18 @@ CLI では次のオプションを利用できます。
 - `--scale <number>`: ページスケール。既定値は `1`。
 - `--margin-top`, `--margin-right`, `--margin-bottom`, `--margin-left`: CSS の余白値。既定値は `10mm`。
 
+短縮形も利用できます。
+
+- `-i`: `--input`
+- `-o`: `--output`
+- `-p`: `--plan`
+- `-r`: `--report-format`
+- `-j`: `--help-format`
+- `-t`: `--timeout`
+- `-f`: `--format`
+- `-l`: `--landscape`
+- `-s`: `--scale`
+
 特定のブラウザ実行ファイルを使う必要がある場合は、`PUPPETEER_EXECUTABLE_PATH` を設定してください。
 
 Mermaid 図表は描画時に jsDelivr CDN から読み込まれるため、Mermaid を含む文書を変換する場合はネットワーク接続が必要です。
