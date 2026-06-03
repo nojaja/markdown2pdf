@@ -1,11 +1,30 @@
 {
-  "name": "markdown2pdf",
+  "name": "mermaid-md-pdf-cli",
   "version": "1.0.0",
-  "description": "CLI to convert Markdown with Mermaid diagrams into PDF",
+  "description": "Command-line tool to convert Markdown with Mermaid diagrams into PDF files",
   "type": "commonjs",
   "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "bin": {
     "md2pdf": "dist/src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nojaja/markdown2pdf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nojaja/markdown2pdf/issues"
+  },
+  "homepage": "https://github.com/nojaja/markdown2pdf#readme",
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "README_ja.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "22.x"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

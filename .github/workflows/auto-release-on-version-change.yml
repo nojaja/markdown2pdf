@@ -1,0 +1,246 @@
+name: Auto Release on Version Change (npm + GitHub Release)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+
+env:
+  TAG_PREFIX: v
+  PACKAGE_PATH: package.json
+  CHANGELOG_PATH: CHANGELOG.md
+  NODE_VERSION: 22.21.0
+
+permissions:
+  contents: write
+
+jobs:
+  check-version:
+    name: Check version change
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.compare.outputs.version_changed }}
+      tag_name: ${{ steps.compare.outputs.tag_name }}
+      tag_exists: ${{ steps.compare.outputs.tag_exists }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read current version from package.json
+        id: current
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./${PACKAGE_PATH}').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "現在のバージョン: $VERSION"
+
+      - name: Read previous version from latest version tag
+        id: previous
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST_TAG=$(git tag -l "${TAG_PREFIX}[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1)
+
+          if [ -n "$LATEST_TAG" ] && git show "$LATEST_TAG:${PACKAGE_PATH}" > /tmp/previous-package.json 2>/dev/null; then
+            PREVIOUS_VERSION=$(node -p "require('/tmp/previous-package.json').version")
+            echo "最新タグ($LATEST_TAG)のバージョン: $PREVIOUS_VERSION"
+          else
+            PREVIOUS_VERSION='0.0.0'
+            echo "比較用の過去バージョンがないため初回リリースとして扱います"
+          fi
+
+          echo "version=$PREVIOUS_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions and check tag existence
+        id: compare
+        shell: bash
+        run: |
+          set -euo pipefail
+          CURRENT_VERSION='${{ steps.current.outputs.version }}'
+          PREVIOUS_VERSION='${{ steps.previous.outputs.version }}'
+          TAG_NAME="${TAG_PREFIX}${CURRENT_VERSION}"
+
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+            echo "✅ バージョン変更: $PREVIOUS_VERSION -> $CURRENT_VERSION"
+
+            if git ls-remote --exit-code --tags origin "$TAG_NAME" >/dev/null 2>&1; then
+              echo "tag_exists=true" >> "$GITHUB_OUTPUT"
+              echo "⚠️ タグ $TAG_NAME は既に存在します"
+            else
+              echo "tag_exists=false" >> "$GITHUB_OUTPUT"
+              echo "✨ 新規タグ $TAG_NAME を作成します"
+            fi
+          else
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+            echo "tag_exists=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ バージョン変更はありません"
+          fi
+
+  test:
+    name: Test on Node.js ${{ matrix.node-version }}
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - 22.x
+          - 22.21.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Pin npm for OIDC Trusted Publishing compatibility
+        run: |
+          npm i -g npm@11.5.1
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+  create-tag:
+    name: Create version tag
+    needs:
+      - check-version
+      - test
+    if: >-
+      github.event_name == 'push' &&
+      needs.check-version.outputs.version_changed == 'true' &&
+      needs.check-version.outputs.tag_exists == 'false' &&
+      needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push tag
+        run: |
+          set -euo pipefail
+          TAG_NAME='${{ needs.check-version.outputs.tag_name }}'
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+          echo "✅ タグ $TAG_NAME を作成しました"
+
+  create-release:
+    name: Create GitHub Release
+    needs:
+      - check-version
+      - create-tag
+    if: >-
+      github.event_name == 'push' &&
+      needs.check-version.outputs.version_changed == 'true' &&
+      needs.create-tag.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract release note from changelog
+        id: notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG_NAME='${{ needs.check-version.outputs.tag_name }}'
+          VERSION_NO_PREFIX="${TAG_NAME#${TAG_PREFIX}}"
+
+          if [ -f "$CHANGELOG_PATH" ]; then
+            START_LINE=$(grep -nE "^##[[:space:]]+\\[?${VERSION_NO_PREFIX}\\]?" "$CHANGELOG_PATH" | head -1 | cut -d: -f1 || true)
+
+            if [ -n "$START_LINE" ]; then
+              NEXT_LINE=$(tail -n +$((START_LINE + 1)) "$CHANGELOG_PATH" | grep -n "^## " | head -1 | cut -d: -f1 || true)
+              if [ -n "$NEXT_LINE" ]; then
+                END_LINE=$((START_LINE + NEXT_LINE - 1))
+                CONTENT=$(sed -n "${START_LINE},${END_LINE}p" "$CHANGELOG_PATH" | tail -n +2)
+              else
+                CONTENT=$(tail -n +$((START_LINE + 1)) "$CHANGELOG_PATH")
+              fi
+            else
+              CONTENT="バージョン ${VERSION_NO_PREFIX} のリリース"
+            fi
+          else
+            CONTENT="バージョン ${VERSION_NO_PREFIX} のリリース"
+          fi
+
+          {
+            echo 'content<<EOF'
+            echo "$CONTENT"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check-version.outputs.tag_name }}
+          name: Release ${{ needs.check-version.outputs.tag_name }}
+          body: ${{ steps.notes.outputs.content }}
+          draft: false
+          prerelease: false
+
+  publish-npm:
+    name: Publish to npm (Trusted Publishing)
+    needs:
+      - check-version
+      - test
+      - create-tag
+    if: >-
+      github.event_name == 'push' &&
+      needs.check-version.outputs.version_changed == 'true' &&
+      needs.create-tag.result == 'success' &&
+      needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org/
+
+      - name: Pin npm for Trusted Publishing (fixed version)
+        run: |
+          npm i -g npm@11.5.1
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Publish package
+        run: npm publish --access public
+
+      - name: Trusted Publisher registration reminder
+        run: |
+          echo "NPM.js > Package Settings > Trusted Publisher で GitHub Actions を登録してください"
+          echo "Organization/User, Repository, Workflow filename(このYAML名), Environment(nameは空欄可) を一致させます"
