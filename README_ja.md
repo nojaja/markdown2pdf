@@ -14,11 +14,6 @@ AI エージェントが使う場合は、`--help-format json` と `--report-for
 npx mermaid-md-pdf-cli --help
 ```
 
-公開パッケージを明示して `md2pdf` バイナリを実行する場合は次を使います。
-
-```bash
-npx --package mermaid-md-pdf-cli md2pdf --help
-```
 
 Markdown ファイル 1 つを PDF に変換します。
 

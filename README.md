@@ -14,11 +14,6 @@ Run the CLI with `npx`:
 npx mermaid-md-pdf-cli --help
 ```
 
-You can also execute the published package explicitly and call the `md2pdf` binary:
-
-```bash
-npx --package mermaid-md-pdf-cli md2pdf --help
-```
 
 Convert a single Markdown file:
 
