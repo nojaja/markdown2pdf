@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs';
 
 import {
   defaultFileSystemWrapper,
@@ -8,6 +9,7 @@ import { renderMarkdownToHtml } from './markdown-renderer';
 import { defaultPdfRenderer, type PdfRenderOptions, type PdfRenderer } from './pdf-renderer';
 
 export type Converter = (source: string, output: string, options: PdfRenderOptions) => Promise<void>;
+type MermaidScriptLoader = () => string;
 
 /**
  * 処理名: 既定コンバーター生成
@@ -18,16 +20,20 @@ export type Converter = (source: string, output: string, options: PdfRenderOptio
  *
  * @param fileSystem ファイルシステムラッパー
  * @param pdfRenderer PDFレンダラー
+ * @param mermaidScriptLoader Mermaidスクリプト取得関数
  * @returns 変換関数
  */
 export const createDefaultConverter = (
   fileSystem: FileSystemWrapper = defaultFileSystemWrapper,
-  pdfRenderer: PdfRenderer = defaultPdfRenderer
+  pdfRenderer: PdfRenderer = defaultPdfRenderer,
+  mermaidScriptLoader: MermaidScriptLoader = loadBundledMermaidScript
 ): Converter => {
+  const mermaidScript = mermaidScriptLoader();
+
   return async (source: string, output: string, options: PdfRenderOptions): Promise<void> => {
     const markdown = fileSystem.readTextFile(source);
     const bodyHtml = renderMarkdownToHtml(markdown);
-    const html = buildHtmlDocument(bodyHtml);
+    const html = buildHtmlDocument(bodyHtml, mermaidScript);
 
     fileSystem.ensureDirectory(path.dirname(output));
     await pdfRenderer.renderHtmlToPdf(html, output, options);
@@ -42,9 +48,10 @@ export const createDefaultConverter = (
  * 実装理由: CSSとMermaid初期化スクリプトを毎回同一条件で適用するため
  *
  * @param bodyHtml Markdown本文HTML
+ * @param mermaidScript Mermaid本体のスクリプト文字列
  * @returns HTML全文
  */
-const buildHtmlDocument = (bodyHtml: string): string => {
+const buildHtmlDocument = (bodyHtml: string, mermaidScript: string): string => {
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -73,7 +80,9 @@ const buildHtmlDocument = (bodyHtml: string): string => {
         text-align: center;
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+      ${mermaidScript}
+    </script>
     <script>
       mermaid.initialize({ startOnLoad: true });
     </script>
@@ -82,4 +91,18 @@ const buildHtmlDocument = (bodyHtml: string): string => {
     ${bodyHtml}
   </body>
 </html>`;
+};
+
+/**
+ * 処理名: 同梱Mermaid読込
+ *
+ * 処理概要: npm依存として同梱されたMermaid本体スクリプトを読込む
+ *
+ * 実装理由: 変換時に外部ネットワークアクセスを不要化するため
+ *
+ * @returns Mermaid本体のスクリプト文字列
+ */
+const loadBundledMermaidScript = (): string => {
+  const mermaidScriptPath = require.resolve('mermaid/dist/mermaid.min.js');
+  return fs.readFileSync(mermaidScriptPath, 'utf-8');
 };
