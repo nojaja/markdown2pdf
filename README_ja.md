@@ -1,4 +1,4 @@
-# mermaid-md-pdf-cli
+﻿# mermaid-md-pdf-cli
 
 `mermaid-md-pdf-cli` は、Markdown ファイルを PDF に変換する CLI ツールです。Mermaid 図表もヘッドレスブラウザ経由で描画して出力できます。
 
@@ -91,7 +91,7 @@ CLI では次のオプションを利用できます。
 
 特定のブラウザ実行ファイルを使う必要がある場合は、`PUPPETEER_EXECUTABLE_PATH` を設定してください。
 
-Mermaid 図表は描画時に jsDelivr CDN から読み込まれるため、Mermaid を含む文書を変換する場合はネットワーク接続が必要です。
+Mermaid 実行スクリプトはパッケージに同梱されるため、Mermaid を含む文書の変換時に外部ネットワーク接続は不要です。
 
 ## 例
 

@@ -1,4 +1,4 @@
-# mermaid-md-pdf-cli
+﻿# mermaid-md-pdf-cli
 
 `mermaid-md-pdf-cli` is a command-line tool that converts Markdown files into PDF documents, including Mermaid diagrams rendered through a headless browser.
 
@@ -91,7 +91,7 @@ Shorthand aliases are also available:
 
 If you need to point Puppeteer to a specific browser binary, set `PUPPETEER_EXECUTABLE_PATH`.
 
-Mermaid diagrams are loaded from the jsDelivr CDN at render time, so network access is required when converting documents that use Mermaid.
+Mermaid runtime is bundled in the package, so converting documents with Mermaid does not require external network access at runtime.
 
 ## Examples
 
